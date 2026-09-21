@@ -30,4 +30,21 @@ public class VideoUploadedEncodedEventConsumer {
     contentService.updateVideoKey(movieId, videoKey);
 }
 
+@KafkaListener(
+    topics = "video.encoded"
+)
+public void consumeVideoEncodedEvent(
+    @Payload Map<String, Object> payload){
+String movieId = (String) payload.get("movieId");
+String hlsUrl = (String) payload.get("hlsUrl");
+boolean success = (Boolean) payload.get("success");
+
+if(success){
+    contentService.updateHlsUrl(movieId, hlsUrl);
+}
+else{
+    String errorMessage = (String) payload.get("errorMessage");
+    contentService.updateVideoStatus(movieId, VideoStatus.FAILED);
+}
+}
 }
